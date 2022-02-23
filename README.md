@@ -15,12 +15,12 @@ Please note that the script is not super efficient and so creating high-res imag
 ## Running the script
 `mandelbrot.py` should be run from the command line using arguments. There are a few different ways to approach generating an image:
 1. Specifying the coordinates *and* zoom through the use of `-c` or `--centre` and `-z` or `--zoom`, respectively. Points are formatted with a space between the real part and the imaginary part, e.g ```-c "-1 0"```.
-2. Choosing a preset from configs.json with `-cs`, e.g `-cs tendril`. This will specify the zoom and centre implicitly. Examples of the images created with these presets are located in `examples/`. You can create your own preset by specifying `-sc <name>` or `--save-config <name>`.
+2. Choosing a preset from configs.json with `-cs`, e.g `-cs tendril`. This will specify the zoom and centre implicitly. Examples of the images created with these presets can be found at the [bottom](#examples). You can create your own preset by specifying `-sc <name>` or `--save-config <name>`.
 3. Running the script through either option 1. or 2. and specifying `-sd` or `--save-data`, subsequently calling the script with `-ld` or `--load-data`. This can be useful for plotting images in multiple palletes.
 
 Other important command line arguments not already discussed above include:
 - `-r, --resolution`: options include ultra, high, med, low. At aspect ratio 16:9 (the default), high renders an image in 1920x1080p.
-- `-p, --pallete`: a choice of one of the palletes in `config.json`. Options include warm, neon, dark, electric, and pastel. Examples of each can be found in `examples/`.
+- `-p, --pallete`: a choice of one of the palletes in `config.json`. Options include warm, neon, dark, electric, and pastel. Examples of each can be found at the [bottom](#examples).
 
 Putting all this together, one configuration we might try is 
 
@@ -38,6 +38,19 @@ This would create the following image, and quite a lot more quickly since we cir
 
 ![pastel-void](examples/pastel-void.png)
 
-## Other examples
-
-![dark-capillary](examples/dark-capillary.png "dark-capillary") ![dark-tilt](examples/dark-tilt.png "dark-titlt")
+## Examples
+| pallete, -cs name  | image |
+| ------------- | ------------- |
+| pastel, void | ![](examples/pastel-void.png) |
+| warm, doubletentacle | ![](examples/warm-doubletentacle.png) |
+| pastel, splotches | ![](examples/pastel-splotches.png) |
+| warm, chloro | ![](examples/warm-chloro-zoom.png) |
+| warm, tentacle | ![](examples/warm-tentacle.png) |
+| warm, tendril | ![](examples/warm-tendril.png) |
+| dark, tilt | ![](examples/dark-tilt.png) |
+| neon, tilt | ![](examples/neon-tilt-zoom-out.png) |
+| dark, capillary | ![](examples/dark-capillary.png) |
+| electric, void | ![](examples/electric-void.png) |
+| pastel, divergence | ![](examples/pastel-divergence.png) |
+| warm, knife | ![](examples/warm-knife.png) |
+| warm, classic | ![](examples/warm-classic.png) |
