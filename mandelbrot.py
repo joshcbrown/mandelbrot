@@ -37,8 +37,8 @@ def get_args():
     if args.centre is None or args.zoom is None:
         if args.centre_string is None:
             image_index = random.randint(0, len(config['images'].values()) - 1)
-            args.centre = [*config['images'].values()][image_index]['centre']
-            args.zoom = [*config['images'].values()][image_index]['zoom']
+            args.centre = args.centre or [*config['images'].values()][image_index]['centre']
+            args.zoom = args.zoom or [*config['images'].values()][image_index]['zoom']
             args.centre_string = [*config['images'].keys()][image_index]
         else:
             args.centre = config['images'][args.centre_string]['centre']
@@ -83,7 +83,11 @@ def iter_count(c: complex, args: argparse.ArgumentParser) -> int:
 
 def save_image(image, args):
     curr_time = time.strftime('%H:%M:%S', time.localtime())
-    image.save(f'{args.pallete}-{args.centre_string}-{curr_time}.png')
+    if args.load_data is not None:
+        image.save(f'{args.pallete}-{args.load_data[:-4]}-{curr_time}.png')
+    else:
+        image.save(f'{args.pallete}-{args.centre_string}-{curr_time}.png')
+
 
 def main():
     args = get_args()
@@ -99,7 +103,7 @@ def main():
     
 
     if args.load_data is not None:
-        hue_array = np.load(args.load_data)
+        hue_array = np.load(f'data/{args.load_data}')
         image = Image.new(mode="RGB", size=hue_array.shape)
         for i, row in tqdm(enumerate(hue_array)):
             for j, num in enumerate(row):
@@ -107,7 +111,7 @@ def main():
                 image.putpixel((i, j), tuple([int(num) for num in hue]))
         save_image(image, args)
         return
-
+    start = time.time()
     image = Image.new(mode="RGB", size=args.resolution)
     iteration_counts = np.zeros(args.resolution).astype(int)
     for i, x in tqdm(enumerate(x_axis)):
@@ -134,6 +138,7 @@ def main():
     save_image(image, args)
     if args.save_data:
         np.save(f'data/{args.centre_string}', hue_array)
+    print(time.time() - start)
 
 if __name__ == '__main__':
     main()
