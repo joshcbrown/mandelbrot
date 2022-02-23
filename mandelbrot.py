@@ -19,7 +19,7 @@ def get_args():
                         choices=["ultra", "high", "med", "low"], default="med")
     parser.add_argument('-a', '--aspect-ratio', type=str,
                         help="give in the format x:y", default="16:9")
-    parser.add_argument('-i', '--max-iters', type=int, default=300)
+    parser.add_argument('-i', '--max-iters', type=int, default=1000)
     parser.add_argument('-b', '--bound', type=int, default=500)
     parser.add_argument('-sc', '--save-config', type=str,
                         help='name of image you want to save')
