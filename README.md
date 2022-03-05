@@ -39,18 +39,17 @@ This would create the following image, and quite a lot more quickly since we cir
 ![pastel-void](examples/pastel-void.png)
 
 ## Examples
-| pallete, -cs name  | image |
-| ------------- | ------------- |
-| pastel, void | ![](examples/pastel-void.png) |
-| warm, doubletentacle | ![](examples/warm-doubletentacle.png) |
-| pastel, splotches | ![](examples/pastel-splotches.png) |
-| warm, chloro | ![](examples/warm-chloro-zoom.png) |
-| warm, tentacle | ![](examples/warm-tentacle.png) |
-| warm, tendril | ![](examples/warm-tendril.png) |
-| dark, tilt | ![](examples/dark-tilt.png) |
-| neon, tilt | ![](examples/neon-tilt-zoom-out.png) |
 | dark, capillary | ![](examples/dark-capillary.png) |
+| dark, tilt | ![](examples/dark-tilt.png) |
+| electric, squircle | ![](examples/electric-squircle.png) |
 | electric, void | ![](examples/electric-void.png) |
+| neon, tilt | ![](examples/neon-tilt-zoom-out.png) |
 | pastel, divergence | ![](examples/pastel-divergence.png) |
-| warm, knife | ![](examples/warm-knife.png) |
+| pastel, splotches | ![](examples/pastel-splotches.png) |
+| pastel, void | ![](examples/pastel-void.png) |
+| warm, chloro | ![](examples/warm-chloro-zoom.png) |
 | warm, classic | ![](examples/warm-classic.png) |
+| warm, doubletentacle | ![](examples/warm-doubletentacle.png) |
+| warm, knife | ![](examples/warm-knife.png) |
+| warm, tendril | ![](examples/warm-tendril.png) |
+| warm, tentacle | ![](examples/warm-tentacle.png) |
