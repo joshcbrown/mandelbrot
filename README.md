@@ -39,6 +39,8 @@ This would create the following image, and quite a lot more quickly since we cir
 ![pastel-void](examples/pastel-void.png)
 
 ## Examples
+| pallete, -cs name  | image |
+| ------------- | ------------- |
 | dark, capillary | ![](examples/dark-capillary.png) |
 | dark, tilt | ![](examples/dark-tilt.png) |
 | electric, squircle | ![](examples/electric-squircle.png) |
