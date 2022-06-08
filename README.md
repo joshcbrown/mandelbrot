@@ -1,6 +1,6 @@
 # mandelbrot
 
-The [Mandelbrot Set](https://en.wikipedia.org/wiki/Mandelbrot_set) is a set of numbers {c in C} in the complex plane for which the value of the a simple function f_c(z) does not diverge when applied recurively to infinity, with z_0=0. Various [plotting algorithms](https://en.wikipedia.org/wiki/Plotting_algorithms_for_the_Mandelbrot_set) exist to transform a black-or-white image of the set (either a point is in the set, or it isn't) into a colour image. Most of these use the so-called escape count -- how quickly the [absolute value](https://en.wikipedia.org/wiki/Absolute_value#Complex_numbers) of each point escapes a certain arbitrary bound.
+The [Mandelbrot Set](https://en.wikipedia.org/wiki/Mandelbrot_set) is a set of numbers $\{c \in C}$ in the complex plane for which the value of the a simple function $f_c(z_i) = z_{i-1}^2+c, z_0=0$ does not diverge when applied recurively to infinity. Various [plotting algorithms](https://en.wikipedia.org/wiki/Plotting_algorithms_for_the_Mandelbrot_set) exist to transform a black-or-white image of the set (either a point is in the set, or it isn't) into a colour image. Most of these use the so-called escape count -- how quickly the [absolute value](https://en.wikipedia.org/wiki/Absolute_value#Complex_numbers) of each point escapes a certain arbitrary bound.
 ![Classic picture of the set](examples/warm-classic.png)
 
 This script uses such an algorithm to plot the set with some customisability options, including but not limited to:
