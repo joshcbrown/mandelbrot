@@ -8,6 +8,7 @@ import json
 import random
 from numba import njit
 
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--centre',
@@ -51,7 +52,7 @@ def get_args():
         args.centre_string = "custom"
 
     args.aspect_ratio = tuple([int(num)
-                              for num in args.aspect_ratio.split(':')])
+                               for num in args.aspect_ratio.split(':')])
 
     resolution_dict = {
         'ultra': 240,
@@ -63,7 +64,7 @@ def get_args():
         [num * resolution_dict[args.resolution] for num in args.aspect_ratio])
 
     if args.save_config is not None:
-        #TODO: check for duplicates before saving
+        # TODO: check for duplicates before saving
         new_image = {'centre': args.centre, 'zoom': args.zoom}
         config['images'][args.save_config] = new_image
         json.dump(config, open('configs.json', 'w'))
@@ -87,13 +88,22 @@ def jit_get_iter_counts(x_axis, y_axis, resolution, max_iters, bound):
     for i, x in enumerate(x_axis):
         for j, y in enumerate(y_axis):
             z = c = complex(x, y)
-            for iter in range(max_iters):
+            iters = 0
+            for iters in range(max_iters):
                 z = z ** 2 + c
                 if abs(z) > bound:
                     break
-            iteration_counts[i, j] = iter
+            iteration_counts[i, j] = iters
     return iteration_counts
 
+
+@njit
+def jit_get_cumulutive_pp(iteration_counts):
+    num_iters_pp = np.zeros(iteration_counts.max() + 1, dtype=np.int32)
+    for row in iteration_counts:
+        for count in row:
+            num_iters_pp[count] += 1
+    return num_iters_pp
 
 
 def main():
@@ -101,13 +111,12 @@ def main():
     # TODO: comment it up
     cs = PchipInterpolator(args.vals, args.colours)
 
-    x_axis = np.linspace(args.centre[0] - args.aspect_ratio[0]/args.zoom,
-                         args.centre[0] + args.aspect_ratio[0]/args.zoom,
+    x_axis = np.linspace(args.centre[0] - args.aspect_ratio[0] / args.zoom,
+                         args.centre[0] + args.aspect_ratio[0] / args.zoom,
                          args.resolution[0])
-    y_axis = np.linspace(args.centre[1] + args.aspect_ratio[1]/args.zoom,
-                         args.centre[1] - args.aspect_ratio[1]/args.zoom,
+    y_axis = np.linspace(args.centre[1] + args.aspect_ratio[1] / args.zoom,
+                         args.centre[1] - args.aspect_ratio[1] / args.zoom,
                          args.resolution[1])
-    
 
     if args.load_data is not None:
         hue_array = np.load(f'data/{args.load_data}')
@@ -118,14 +127,13 @@ def main():
                 image.putpixel((i, j), tuple([int(num) for num in hue]))
         save_image(image, args)
         return
-    start = time.time()
+    start = time.perf_counter()
     image = Image.new(mode="RGB", size=args.resolution)
-    iteration_counts = jit_get_iter_counts(x_axis, y_axis, args.resolution, args.max_iters, args.bound)
 
-    num_iters_pp = np.zeros(iteration_counts.max() + 1).astype(int)
-    for row in tqdm(iteration_counts):
-        for count in row:
-            num_iters_pp[count] += 1
+    iter_start = time.perf_counter()
+    iteration_counts = jit_get_iter_counts(x_axis, y_axis, args.resolution, args.max_iters, args.bound)
+    num_iters_pp = jit_get_cumulutive_pp(iteration_counts)
+    print(f"total iter time: {time.perf_counter() - iter_start}")
 
     total = args.resolution[0] * args.resolution[1]
 
@@ -138,11 +146,12 @@ def main():
             if args.save_data:
                 hue_array[i][j] = num_iters_pp[:count + 1].sum() / total
             image.putpixel((i, j), tuple(hue))
-    
+
     save_image(image, args)
     if args.save_data:
         np.save(f'data/{args.centre_string}', hue_array)
-    print(time.time() - start)
+    print(time.perf_counter() - start)
+
 
 if __name__ == '__main__':
     main()
