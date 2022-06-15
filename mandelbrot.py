@@ -106,10 +106,23 @@ def jit_get_cumulutive_pp(iteration_counts):
     return num_iters_pp
 
 
+def handle_loading_data(args, cs):
+    hue_array = np.load(f'data/{args.load_data}')
+    image = Image.new(mode="RGB", size=hue_array.shape)
+    for i, row in tqdm(enumerate(hue_array)):
+        for j, num in enumerate(row):
+            hue = cs(num)
+            image.putpixel((i, j), tuple([int(num) for num in hue]))
+    save_image(image, args)
+
+
 def main():
     args = get_args()
-    # TODO: comment it up
+
     cs = PchipInterpolator(args.vals, args.colours)
+    if args.load_data is not None:
+        handle_loading_data(args, cs)
+        return
 
     x_axis = np.linspace(args.centre[0] - args.aspect_ratio[0] / args.zoom,
                          args.centre[0] + args.aspect_ratio[0] / args.zoom,
@@ -117,26 +130,15 @@ def main():
     y_axis = np.linspace(args.centre[1] + args.aspect_ratio[1] / args.zoom,
                          args.centre[1] - args.aspect_ratio[1] / args.zoom,
                          args.resolution[1])
-
-    if args.load_data is not None:
-        hue_array = np.load(f'data/{args.load_data}')
-        image = Image.new(mode="RGB", size=hue_array.shape)
-        for i, row in tqdm(enumerate(hue_array)):
-            for j, num in enumerate(row):
-                hue = cs(num)
-                image.putpixel((i, j), tuple([int(num) for num in hue]))
-        save_image(image, args)
-        return
     start = time.perf_counter()
-    image = Image.new(mode="RGB", size=args.resolution)
 
-    iter_start = time.perf_counter()
     iteration_counts = jit_get_iter_counts(x_axis, y_axis, args.resolution, args.max_iters, args.bound)
     num_iters_pp = jit_get_cumulutive_pp(iteration_counts)
-    print(f"total iter time: {time.perf_counter() - iter_start}")
+    print(f"total iter time: {time.perf_counter() - start}")
 
     total = args.resolution[0] * args.resolution[1]
 
+    image = Image.new(mode="RGB", size=args.resolution)
     if args.save_data:
         hue_array = np.zeros_like(iteration_counts).astype(float)
     for i, row in tqdm(enumerate(iteration_counts)):
@@ -144,7 +146,7 @@ def main():
             hue = cs(num_iters_pp[:count + 1].sum() / total)
             hue = [int(i) for i in hue]
             if args.save_data:
-                hue_array[i][j] = num_iters_pp[:count + 1].sum() / total
+                hue_array[i, j] = num_iters_pp[:count + 1].sum() / total
             image.putpixel((i, j), tuple(hue))
 
     save_image(image, args)
