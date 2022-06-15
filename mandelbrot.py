@@ -6,7 +6,7 @@ from scipy.interpolate import PchipInterpolator
 import argparse
 import json
 import random
-
+from numba import njit
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -73,20 +73,27 @@ def get_args():
     return args
 
 
-def iter_count(c: complex, args: argparse.ArgumentParser) -> int:
-    z = c
-    for i in range(args.max_iters):
-        z = z ** 2 + c
-        if abs(z) > args.bound:
-            return i
-    return args.max_iters
-
 def save_image(image, args):
     curr_time = time.strftime('%H:%M:%S', time.localtime())
     if args.load_data is not None:
         image.save(f'{args.pallete}-{args.load_data[:-4]}-{curr_time}.png')
     else:
         image.save(f'{args.pallete}-{args.centre_string}-{curr_time}.png')
+
+
+@njit
+def jit_get_iter_counts(x_axis, y_axis, resolution, max_iters, bound):
+    iteration_counts = np.zeros(resolution, dtype=np.int16)
+    for i, x in enumerate(x_axis):
+        for j, y in enumerate(y_axis):
+            z = c = complex(x, y)
+            for iter in range(max_iters):
+                z = z ** 2 + c
+                if abs(z) > bound:
+                    break
+            iteration_counts[i, j] = iter
+    return iteration_counts
+
 
 
 def main():
@@ -113,10 +120,7 @@ def main():
         return
     start = time.time()
     image = Image.new(mode="RGB", size=args.resolution)
-    iteration_counts = np.zeros(args.resolution).astype(int)
-    for i, x in tqdm(enumerate(x_axis)):
-        for j, y in enumerate(y_axis):
-            iteration_counts[i][j] = iter_count(complex(x, y), args)
+    iteration_counts = jit_get_iter_counts(x_axis, y_axis, args.resolution, args.max_iters, args.bound)
 
     num_iters_pp = np.zeros(iteration_counts.max() + 1).astype(int)
     for row in tqdm(iteration_counts):
