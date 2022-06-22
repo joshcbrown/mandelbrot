@@ -7,6 +7,7 @@ import argparse
 import json
 import random
 from numba import njit
+from linear_interp import LinearInterpolator
 
 
 def get_args():
@@ -119,7 +120,7 @@ def handle_loading_data(args, cs):
 def main():
     args = get_args()
 
-    cs = PchipInterpolator(args.vals, args.colours)
+    cs = LinearInterpolator(args.vals, args.colours)
     if args.load_data is not None:
         handle_loading_data(args, cs)
         return
@@ -143,8 +144,7 @@ def main():
         hue_array = np.zeros_like(iteration_counts).astype(float)
     for i, row in tqdm(enumerate(iteration_counts)):
         for j, count in enumerate(row):
-            hue = cs(num_iters_pp[:count + 1].sum() / total)
-            hue = [int(i) for i in hue]
+            hue = (cs(num_iters_pp[:count + 1].sum() / total)).astype(int)
             if args.save_data:
                 hue_array[i, j] = num_iters_pp[:count + 1].sum() / total
             image.putpixel((i, j), tuple(hue))
