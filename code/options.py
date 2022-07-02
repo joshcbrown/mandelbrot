@@ -21,6 +21,7 @@ def get_args():
     parser.add_argument('-sd', '--save-data', action='store_true')
     parser.add_argument('-ld', '--load-data')
     parser.add_argument('-p', '--pallete', default='warm')
+    parser.add_argument("-si", "--save-image", type=bool, default=None)
 
     args = parser.parse_args()
 
@@ -61,7 +62,8 @@ def get_args():
         # TODO: check for duplicates before saving
         new_image = {'centre': args.centre, 'zoom': args.zoom}
         config['images'][args.save_config] = new_image
-        json.dump(config, open('../configs.json', 'w'))
+        with open("../configs.json", "w") as file:
+            json.dump(config, file, indent=4, sort_keys=True)
         print("saved image. exiting...")
         exit(0)
 

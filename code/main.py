@@ -40,6 +40,18 @@ def generate_image(args, iteration_counts, num_iters_pp, total, cs):
     return image
 
 
+def to_save_or_not_to_save(args):
+    if args.save_image is not None:
+        print(args.save_image)
+        return args.save_image
+    while True:
+        if (save := input("save image? (y/n)").lower()) == "y":
+            return True
+        elif save == "n":
+            return False
+        print("invalid input ", save)
+
+
 def main():
     args = get_args()
 
@@ -62,8 +74,13 @@ def main():
 
     total = args.resolution[0] * args.resolution[1]
     image = generate_image(args, iteration_counts, num_iters_pp, total, cs)
-    save_image(image, args)
+    image.show()
+
     print("total time: ", time.perf_counter() - start)
+
+    save = to_save_or_not_to_save(args)
+    if save:
+        save_image(image, args)
 
 
 if __name__ == '__main__':
