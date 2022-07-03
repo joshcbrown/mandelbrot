@@ -9,13 +9,13 @@ def get_args():
                         help="centre of the image on the plane. give in the format"
                              "x y")
     parser.add_argument("-cs", "--centre-string")
-    parser.add_argument('-z', '--zoom', type=float)
+    parser.add_argument('-z', '--zoom', type=float, default=8)
     parser.add_argument('-r', '--resolution', type=str,
                         choices=["ultra", "high", "med", "low"], default="med")
     parser.add_argument('-a', '--aspect-ratio', type=str,
                         help="give in the format x:y", default="16:9")
     parser.add_argument('-i', '--max-iters', type=int, default=1000)
-    parser.add_argument('-b', '--bound', type=int, default=500)
+    parser.add_argument('-b', '--bound', type=int, default=2)
     parser.add_argument('-sc', '--save-config', type=str,
                         help='name of image you want to save')
     parser.add_argument('-sd', '--save-data', action='store_true')

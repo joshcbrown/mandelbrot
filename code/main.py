@@ -2,10 +2,10 @@ import numpy as np
 from PIL import Image
 import time
 from tqdm import tqdm
-from mandelbrot import get_iter_counts, get_cumulative_pp
-from linear_interp import LinearInterpolator
+from mandelbrot import get_iter_counts
+from linear_interp import LinearInterpolator, RandomLinearInterpolator
 from options import get_args
-
+import matplotlib.pyplot as plt
 
 def save_image(image, args):
     curr_time = time.strftime('%H:%M:%S', time.localtime())
@@ -25,15 +25,15 @@ def handle_loading_data(args, cs):
     save_image(image, args)
 
 
-def generate_image(args, iteration_counts, num_iters_pp, total, cs):
+def generate_image(args, iteration_counts, total, cs):
     image = Image.new(mode="RGB", size=args.resolution)
     if args.save_data:
         hue_array = np.zeros_like(iteration_counts).astype(float)
     for i, row in tqdm(enumerate(iteration_counts)):
         for j, count in enumerate(row):
-            hue = (cs(num_iters_pp[:count + 1].sum() / total)).astype(int)
+            hue = (cs(iteration_counts[i][j])).astype(int)
             if args.save_data:
-                hue_array[i, j] = num_iters_pp[:count + 1].sum() / total
+                hue_array[i, j] = iteration_counts[i][j]
             image.putpixel((i, j), tuple(hue))
     if args.save_data:
         np.save(f'../data/{args.centre_string}', hue_array)
@@ -52,10 +52,9 @@ def to_save_or_not_to_save(args):
         print("invalid input ", save)
 
 
-def main():
-    args = get_args()
-
-    cs = LinearInterpolator(args.vals, args.colours)
+def main(args):
+    # cs = LinearInterpolator(args.vals, args.colours)
+    cs = RandomLinearInterpolator(4, 50)
     if args.load_data is not None:
         handle_loading_data(args, cs)
         return
@@ -69,11 +68,13 @@ def main():
     start = time.perf_counter()
 
     iteration_counts = get_iter_counts(x_axis, y_axis, args.resolution, args.max_iters, args.bound)
-    num_iters_pp = get_cumulative_pp(iteration_counts)
     print(f"total iter time: {time.perf_counter() - start}")
+    print(iteration_counts.dtype)
+    iteration_counts = iteration_counts / args.max_iters
+
 
     total = args.resolution[0] * args.resolution[1]
-    image = generate_image(args, iteration_counts, num_iters_pp, total, cs)
+    image = generate_image(args, iteration_counts, total, cs)
     image.show()
 
     print("total time: ", time.perf_counter() - start)
@@ -84,4 +85,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(get_args())
