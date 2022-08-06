@@ -3,8 +3,6 @@ from numba import njit
 from typing import List
 
 
-
-
 class LinearInterpolator:
     def __init__(self, xs, ys):
         self.xs = np.array(xs, dtype=np.float64)
@@ -13,14 +11,17 @@ class LinearInterpolator:
         x_diffs = self.xs[1:] - self.xs[:-1]
 
         # nasty way to do this with hard coding, but it works for this application
-        x_diffs = x_diffs.repeat(y_diffs.shape[1]).reshape(x_diffs.shape[0], y_diffs.shape[1])
+        x_diffs = x_diffs.repeat(y_diffs.shape[1]).reshape(
+            x_diffs.shape[0], y_diffs.shape[1])
         self.ms = y_diffs / x_diffs
-        self.cs = self.ys[1:] - (self.ms * self.xs[1:].repeat(3).reshape(self.ms.shape))
+        self.cs = self.ys[1:] - \
+            (self.ms * self.xs[1:].repeat(3).reshape(self.ms.shape))
 
     def __call__(self, x):
         return _get_val(x, self.xs, self.ys, self.ms, self.cs)
 
-class PalleteLinearInterpolator(LinearInterpolator):
+
+class PaletteLinearInterpolator(LinearInterpolator):
     def __init__(self, ys, weights, splits):
         print(ys, len(ys))
         ys = list(set([tuple(x) for x in ys]))
@@ -36,7 +37,7 @@ class PalleteLinearInterpolator(LinearInterpolator):
         new_ys = np.array(new_ys)
         print(xs.shape, new_ys.shape)
         super().__init__(xs, new_ys)
-        
+
 
 class RandomLinearInterpolator(LinearInterpolator):
     COLOURS = np.array([
@@ -48,6 +49,7 @@ class RandomLinearInterpolator(LinearInterpolator):
         [0, 255, 255],
         [255, 255, 255]
     ])
+
     def __init__(self, splits):
         xs = np.linspace(0, 1, splits)
         ys = [[0, 0, 0]]
