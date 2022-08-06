@@ -3,16 +3,19 @@ from PIL import Image
 import time
 from tqdm import tqdm
 from mandelbrot import get_iter_counts
-from linear_interp import LinearInterpolator, RandomLinearInterpolator
+from linear_interp import LinearInterpolator, RandomLinearInterpolator, PalleteLinearInterpolator
 from options import get_args
-import matplotlib.pyplot as plt
+from tqdm import trange
+import imageio
+import glob
+
 
 def save_image(image, args):
     curr_time = time.strftime('%H:%M:%S', time.localtime())
     if args.load_data is not None:
         image.save(f'{args.pallete}-{args.load_data[:-4]}-{curr_time}.png')
     else:
-        image.save(f'{args.pallete}-{args.centre_string}-{curr_time}.png')
+        image.save(f'{args.pallete}-{args.centre_string}-{curr_time}-{args.zoom}.png')
 
 
 def handle_loading_data(args, cs):
@@ -40,10 +43,11 @@ def generate_image(args, iteration_counts, total, cs):
     return image
 
 
-def to_save_or_not_to_save(args):
-    if args.save_image is not None:
+def to_save_or_not_to_save(image, args):
+    if args.save_image:
         print(args.save_image)
         return args.save_image
+    image.show()
     while True:
         if (save := input("save image? (y/n)").lower()) == "y":
             return True
@@ -52,13 +56,7 @@ def to_save_or_not_to_save(args):
         print("invalid input ", save)
 
 
-def main(args):
-    # cs = LinearInterpolator(args.vals, args.colours)
-    cs = RandomLinearInterpolator(4, 50)
-    if args.load_data is not None:
-        handle_loading_data(args, cs)
-        return
-
+def plot_image(args, cs):
     x_axis = np.linspace(args.centre[0] - args.aspect_ratio[0] / args.zoom,
                          args.centre[0] + args.aspect_ratio[0] / args.zoom,
                          args.resolution[0])
@@ -69,19 +67,44 @@ def main(args):
 
     iteration_counts = get_iter_counts(x_axis, y_axis, args.resolution, args.max_iters, args.bound)
     print(f"total iter time: {time.perf_counter() - start}")
-    print(iteration_counts.dtype)
     iteration_counts = iteration_counts / args.max_iters
-
 
     total = args.resolution[0] * args.resolution[1]
     image = generate_image(args, iteration_counts, total, cs)
-    image.show()
 
     print("total time: ", time.perf_counter() - start)
 
-    save = to_save_or_not_to_save(args)
+    save = to_save_or_not_to_save(image, args)
     if save:
         save_image(image, args)
+
+def get_pallete(args):
+    if args.pallete is not None:
+        return PalleteLinearInterpolator(args.colours, args.weights, args.splits)
+    return RandomLinearInterpolator(args.splits)
+
+def main(args):
+    if args.load_data is not None:
+        handle_loading_data(args, cs)
+        return
+    
+    if args.gif == 0:
+        for _ in range(args.number):
+            cs = get_pallete(args)
+            plot_image(args, cs)
+        return
+    cs = get_pallete(args)
+    zoom = 4
+    args.save_image = True
+    for _ in trange(args.gif):
+        zoom *= 1.25
+        args.zoom = zoom
+        plot_image(args, cs)
+
+    images = []
+    for filename in sorted(glob.glob("*.png")):
+        images.append(imageio.imread(filename))
+    imageio.mimsave("video2.gif", images)
 
 
 if __name__ == '__main__':
