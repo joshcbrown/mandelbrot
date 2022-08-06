@@ -5,14 +5,15 @@ import random
 
 def get_args():
     config = json.load(open('../configs.json'))
-    palletes = config["palletes"].keys()
+    palettes = config["palettes"].keys()
     centre_strings = config["images"].keys()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--centre',
                         help="centre of the image on the plane. give in the format"
                              "x y")
-    parser.add_argument("-cs", "--centre-string", help=f"allowed choices: {', '.join(centre_strings)}")
+    parser.add_argument("-cs", "--centre-string",
+                        help=f"allowed choices: {', '.join(centre_strings)}")
     parser.add_argument('-z', '--zoom', type=float, default=8)
     parser.add_argument('-r', '--resolution', type=str,
                         choices=["ultra", "high", "med", "low"], default="med")
@@ -24,27 +25,31 @@ def get_args():
                         help='name of image you want to save')
     parser.add_argument('-sd', '--save-data', action='store_true')
     parser.add_argument('-ld', '--load-data')
-    parser.add_argument('-p', '--pallete', help=f"allowed choices: {', '.join(palletes)}")
-    parser.add_argument("-si", "--save-image", action="store_true", default=False)
+    parser.add_argument('-p', '--palette', help=f"allowed choices: {', '.join(palettes)}, random",
+                        default="random")
+    parser.add_argument("-si", "--save-image",
+                        action="store_true", default=False)
     parser.add_argument("-g", "--gif", type=int, default=0)
     parser.add_argument("-n", "--number", type=int, default=1)
     parser.add_argument("-sp", "--splits", type=int, default=40)
 
     args = parser.parse_args()
 
-    if args.pallete:
-        pallete = config['palletes'][args.pallete]
-        args.colours = pallete['colours']
-        if "weights" in pallete.keys():
-            args.weights = pallete["weights"]
+    if args.palette != "random":
+        palette = config['palettes'][args.palette]
+        args.colours = palette['colours']
+        if "weights" in palette.keys():
+            args.weights = palette["weights"]
         else:
             args.weights = [1 / len(args.colours)] * len(args.colours)
 
     if args.centre is None or args.zoom is None:
         if args.centre_string is None:
             image_index = random.randint(0, len(config['images'].values()) - 1)
-            args.centre = args.centre or [*config['images'].values()][image_index]['centre']
-            args.zoom = args.zoom or [*config['images'].values()][image_index]['zoom']
+            args.centre = args.centre or [
+                *config['images'].values()][image_index]['centre']
+            args.zoom = args.zoom or [
+                *config['images'].values()][image_index]['zoom']
             args.centre_string = [*config['images'].keys()][image_index]
         else:
             args.centre = config['images'][args.centre_string]['centre']
