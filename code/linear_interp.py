@@ -1,6 +1,6 @@
 import numpy as np
 from numba import njit
-from typing import List
+import time
 
 
 class LinearInterpolator:
@@ -10,7 +10,8 @@ class LinearInterpolator:
         y_diffs = self.ys[1:] - self.ys[:-1]
         x_diffs = self.xs[1:] - self.xs[:-1]
 
-        # nasty way to do this with hard coding, but it works for this application
+        # nasty way to do this with hard coding, but it works
+        # for this application
         x_diffs = x_diffs.repeat(y_diffs.shape[1]).reshape(
             x_diffs.shape[0], y_diffs.shape[1])
         self.ms = y_diffs / x_diffs
@@ -22,20 +23,21 @@ class LinearInterpolator:
 
 
 class PaletteLinearInterpolator(LinearInterpolator):
-    def __init__(self, ys, weights, splits):
-        print(ys, len(ys))
+    def __init__(self, ys, weights, splits, seed=None):
+        if seed is None:
+            seed = int(time.perf_counter() * 1000)
+            print(f"seed: {seed}")
+        np.random.seed(seed)
+
         ys = list(set([tuple(x) for x in ys]))
 
-        print(ys, len(ys))
-        print(weights, len(weights))
-        xs = np.linspace(0, 1, splits)
+        xs = np.concatenate((np.linspace(0, 0.95, splits-1), np.array([1])))
         new_ys = [[0, 0, 0]]
         for _ in range(xs.size - 2):
             idx = np.random.choice([*range(len(ys))], p=weights)
             new_ys.append(ys[idx])
         new_ys.append([0, 0, 0])
         new_ys = np.array(new_ys)
-        print(xs.shape, new_ys.shape)
         super().__init__(xs, new_ys)
 
 
@@ -50,7 +52,11 @@ class RandomLinearInterpolator(LinearInterpolator):
         [255, 255, 255]
     ])
 
-    def __init__(self, splits):
+    def __init__(self, splits, seed=None):
+        if seed is None:
+            seed = int(time.perf_counter() * 1000)
+            print(f"seed: {seed}")
+        np.random.seed(seed)
         xs = np.linspace(0, 1, splits)
         ys = [[0, 0, 0]]
         for _ in range(xs.size - 2):
@@ -61,7 +67,6 @@ class RandomLinearInterpolator(LinearInterpolator):
             ys.append(new)
         ys.append([0, 0, 0])
         ys = np.array(ys)
-        print(ys.shape)
         ys[-1] = [0, 0, 0]
         super().__init__(xs, ys)
 
@@ -72,7 +77,8 @@ def _get_val(x, xs, ys, ms, cs):
         return ys[-1]
     elif x <= xs[0]:
         return ys[0]
-    # not doing binary search here since it won't make a large difference to performance
+    # not doing binary search here since it won't make a large
+    # difference to performance
 
     for i in range(xs.shape[0] - 1):
         if xs[i] <= x <= xs[i + 1]:

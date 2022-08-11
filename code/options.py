@@ -32,6 +32,7 @@ def get_args():
     parser.add_argument("-g", "--gif", type=int, default=0)
     parser.add_argument("-n", "--number", type=int, default=1)
     parser.add_argument("-sp", "--splits", type=int, default=40)
+    parser.add_argument("-s", "--seed", type=int)
 
     args = parser.parse_args()
 

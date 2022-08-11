@@ -3,7 +3,7 @@ from PIL import Image
 import time
 from tqdm import tqdm
 from mandelbrot import get_iter_counts
-from linear_interp import LinearInterpolator, RandomLinearInterpolator, PaletteLinearInterpolator
+from linear_interp import RandomLinearInterpolator, PaletteLinearInterpolator
 from options import get_args
 from tqdm import trange
 import imageio
@@ -57,7 +57,7 @@ def to_save_or_not_to_save(image, args):
         print("invalid input ", save)
 
 
-def plot_image(args, cs):
+def plot_image(args, cs, iteration_counts=None):
     x_axis = np.linspace(args.centre[0] - args.aspect_ratio[0] / args.zoom,
                          args.centre[0] + args.aspect_ratio[0] / args.zoom,
                          args.resolution[0])
@@ -66,10 +66,11 @@ def plot_image(args, cs):
                          args.resolution[1])
     start = time.perf_counter()
 
-    iteration_counts = get_iter_counts(
-        x_axis, y_axis, args.resolution, args.max_iters, args.bound)
-    print(f"total iter time: {time.perf_counter() - start}")
-    iteration_counts = iteration_counts / args.max_iters
+    if iteration_counts is None:
+        iteration_counts = get_iter_counts(
+            x_axis, y_axis, args.resolution, args.max_iters, args.bound)
+        print(f"total iter time: {time.perf_counter() - start}")
+        iteration_counts = iteration_counts / args.max_iters
 
     total = args.resolution[0] * args.resolution[1]
     image = generate_image(args, iteration_counts, total, cs)
@@ -79,24 +80,23 @@ def plot_image(args, cs):
     save = to_save_or_not_to_save(image, args)
     if save:
         save_image(image, args)
+    return iteration_counts
 
 
 def get_palette(args):
     if args.palette == "random":
         return RandomLinearInterpolator(args.splits)
-    return PaletteLinearInterpolator(args.colours, args.weights, args.splits)
+    return PaletteLinearInterpolator(args.colours, args.weights, args.splits, args.seed)
 
 
 def main(args):
-    if args.load_data is not None:
-        handle_loading_data(args, cs)
-        return
-
     if args.gif == 0:
+        iteration_counts = None
         for _ in range(args.number):
             cs = get_palette(args)
-            plot_image(args, cs)
+            iteration_counts = plot_image(args, cs, iteration_counts)
         return
+
     cs = get_palette(args)
     zoom = 4
     args.save_image = True
